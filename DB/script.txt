@@ -1,0 +1,43 @@
+CREATE TABLE quizz_activity (
+	id	 BIGSERIAL,
+	player_id BIGINT,
+	time_limit BIGINT,
+	quizz_id	 BIGINT NOT NULL,
+	PRIMARY KEY(id)
+);
+
+CREATE TABLE quizz (
+	id		 BIGSERIAL,
+	title	 VARCHAR(512) NOT NULL,
+	description VARCHAR(512) NOT NULL,
+	duration	 BIGINT NOT NULL,
+	player_id	 BIGINT NOT NULL,
+	PRIMARY KEY(id)
+);
+
+CREATE TABLE question (
+	id		 BIGSERIAL,
+	question	 VARCHAR(512) NOT NULL,
+	correct_answer SMALLINT NOT NULL,
+	answer1	 VARCHAR(512) NOT NULL,
+	answer2	 VARCHAR(512) NOT NULL,
+	answer3	 VARCHAR(512),
+	answer4	 VARCHAR(512),
+	img		 VARCHAR(2048),
+	quizz_id	 BIGINT NOT NULL,
+	PRIMARY KEY(id)
+);
+
+CREATE TABLE player (
+	id	 BIGSERIAL,
+	name	 BIGINT NOT NULL,
+	password VARCHAR(512) NOT NULL,
+	PRIMARY KEY(id)
+);
+
+ALTER TABLE quizz_activity ADD CONSTRAINT quizz_activity_fk1 FOREIGN KEY (player_id) REFERENCES player(id) ON DELETE CASCADE;
+ALTER TABLE quizz_activity ADD CONSTRAINT quizz_activity_fk1 FOREIGN KEY (quizz_id) REFERENCES quizz(id) ON DELETE CASCADE;
+ALTER TABLE quizz ADD UNIQUE (title);
+ALTER TABLE quizz ADD CONSTRAINT quizz_fk1 FOREIGN KEY (player_id) REFERENCES player(id) ON DELETE CASCADE;
+ALTER TABLE question ADD CONSTRAINT question_fk1 FOREIGN KEY (quizz_id) REFERENCES quizz(id) ON DELETE CASCADE;
+ALTER TABLE player ADD UNIQUE (name);

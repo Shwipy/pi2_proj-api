@@ -1,0 +1,170 @@
+from flask import Blueprint, request, jsonify
+from database import get_connection, get_connection
+from utils import get_auth_header, get_auth_token, get_body, in_json, codes
+from functools import wraps
+import datetime
+import bcrypt
+import jwt
+import os
+
+player_blueprint = Blueprint("player_blueprint", __name__)
+
+
+def requires_token(f):
+    """
+    This function is a wrapper for the Authorization.
+    It gets the `Authorization` header and reads the token. If the token is not sent, valid or has expired
+    it returns a error
+    """
+
+    @wraps(f)
+    def decorator(*args, **kwargs):
+        if not get_auth_header():
+            return jsonify({"error": "Missing authorization token"}), codes.BAD_REQUEST
+
+        token = get_auth_token()
+
+        if not token:
+            return jsonify({"error": "Wrong token type. Must send 'Bearer {token}'"})
+
+        expire_date = datetime.datetime.fromtimestamp(
+            token["expire_date"]).timestamp()
+        current_date = datetime.datetime.now().timestamp()
+
+        if expire_date < current_date:
+            return jsonify({"error": "Token has expired"}), codes.BAD_REQUEST
+
+        connection = get_connection()
+        cursor = connection.cursor()
+
+        cursor.execute("""SELECT name FROM player WHERE id = %s""",
+                       [get_auth_token()["id"]])
+        result = cursor.fetchone()
+
+        if not result:
+            return jsonify({"error": "User doesn't exist"})
+
+        connection.close()
+        cursor.close()
+
+        return f(*args, **kwargs)
+
+    return decorator
+
+
+@player_blueprint.route("/login", methods=["POST"])
+def login():
+    try:
+        if request.method == "POST":
+
+            body = get_body()
+
+            if not in_json(body, ["name", "password"]):
+                return jsonify({"error": "Missing required fields: (name, password)"}), codes.BAD_REQUEST
+            
+            username = body["name"].strip().lower()
+
+            connection = get_connection()
+            cursor = connection.cursor()
+
+            cursor.execute("""SELECT id, password FROM player WHERE name = %s""",[username])
+            result = cursor.fetchone()
+
+            if result is None:
+                return jsonify({"error": "User not Found"}), codes.NOT_FOUND 
+            
+            id, db_password_hash = result  
+
+            user_password_bytes = body["password"].encode("utf-8")
+            db_bytes = db_password_hash.encode("utf-8")
+
+            password_correct = bcrypt.checkpw(user_password_bytes, db_bytes )
+
+            if not password_correct:
+                return jsonify({"message": "Password Incorrect"}), codes.UNAUTHORIZED
+
+            token = jwt.encode({
+                "id": id,
+                "expire_date": (datetime.datetime.now() + datetime.timedelta(minutes = 5)).timestamp()
+            }, os.getenv("TOKEN_KEY")).decode()
+
+            connection.close()
+            cursor.close()
+
+            return jsonify({"token": token})
+    except Exception as e:
+        return jsonify({"error": str(e)}), codes.API_ERROR
+
+
+@player_blueprint.route("/token", methods=["PUT"])
+@requires_token
+def token():
+    """
+    Tries to login with the required token. 
+    If it's still not expired it will return a renewed token with another expire date
+    """
+
+    try:
+        token = get_auth_token()
+
+        renewed_token = jwt.encode({
+            "id": token["id"],
+            "expire_date": (datetime.datetime.now() + datetime.timedelta(minutes = 5)).timestamp()
+        }, os.getenv("TOKEN_KEY")).decode()
+
+        return jsonify({"token": renewed_token})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), codes.API_ERROR
+
+@player_blueprint.route("/register", methods=["POST"])
+def register():
+    try:
+        body = get_body()
+
+        if not in_json(body, ["name", "password"]):
+            return jsonify({"error": "Missing required fields: (name, password)"}), codes.BAD_REQUEST
+
+        connection = get_connection()
+        cursor = connection.cursor()
+
+        username = body["name"].strip().lower()
+        
+        pass_bytes = body["password"].encode('utf-8')
+        hash_bytes = bcrypt.hashpw(pass_bytes,  bcrypt.gensalt())
+        hash_string = hash_bytes.decode("utf-8")
+
+        cursor.execute("""INSERT INTO player (name, password)
+                            VALUES (%s, %s)""",
+                       [username, hash_string])
+
+        connection.commit()
+        cursor.close()
+        connection.close()
+
+        return jsonify({"message": "ok"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), codes.API_ERROR
+    
+@player_blueprint.route("/player", methods=["GET"])
+@requires_token
+def player():
+    try:
+        token = get_auth_token()
+        my_id = str(token["id"])
+
+        connection = get_connection()
+        cursor = connection.cursor()
+
+        cursor.execute("""SELECT id, name FROM player WHERE id = %s""", [my_id])
+        result = cursor.fetchone()
+
+        player_name = {
+            "id": result[0],
+            "name": result[1]
+        } 
+
+        return jsonify(player_name)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), codes.API_ERROR
