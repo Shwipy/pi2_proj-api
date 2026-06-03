@@ -7,7 +7,7 @@ import bcrypt
 import jwt
 import os
 
-player_blueprint = Blueprint("player_blueprint", __name__)
+user_blueprint = Blueprint("user_blueprint", __name__)
 
 
 def requires_token(f):
@@ -37,7 +37,7 @@ def requires_token(f):
         connection = get_connection()
         cursor = connection.cursor()
 
-        cursor.execute("""SELECT name FROM player WHERE id = %s""",
+        cursor.execute("""SELECT user_name FROM kituser WHERE id = %s""",
                        [get_auth_token()["id"]])
         result = cursor.fetchone()
 
@@ -52,7 +52,7 @@ def requires_token(f):
     return decorator
 
 
-@player_blueprint.route("/login", methods=["POST"])
+@user_blueprint.route("/login", methods=["POST"])
 def login():
     try:
         if request.method == "POST":
@@ -67,7 +67,7 @@ def login():
             connection = get_connection()
             cursor = connection.cursor()
 
-            cursor.execute("""SELECT id, password FROM player WHERE name = %s""",[username])
+            cursor.execute("""SELECT id, password FROM kituser WHERE user_name = %s""",[username])
             result = cursor.fetchone()
 
             if result is None:
@@ -96,7 +96,7 @@ def login():
         return jsonify({"error": str(e)}), codes.API_ERROR
 
 
-@player_blueprint.route("/token", methods=["PUT"])
+@user_blueprint.route("/token", methods=["PUT"])
 @requires_token
 def token():
     """
@@ -117,7 +117,7 @@ def token():
     except Exception as e:
         return jsonify({"error": str(e)}), codes.API_ERROR
 
-@player_blueprint.route("/register", methods=["POST"])
+@user_blueprint.route("/register", methods=["POST"])
 def register():
     try:
         body = get_body()
@@ -128,15 +128,15 @@ def register():
         connection = get_connection()
         cursor = connection.cursor()
 
-        username = body["name"].strip().lower()
+        user_name = body["name"].strip().lower()
         
         pass_bytes = body["password"].encode('utf-8')
         hash_bytes = bcrypt.hashpw(pass_bytes,  bcrypt.gensalt())
         hash_string = hash_bytes.decode("utf-8")
 
-        cursor.execute("""INSERT INTO player (name, password)
+        cursor.execute("""INSERT INTO kituser (user_name, password)
                             VALUES (%s, %s)""",
-                       [username, hash_string])
+                       [user_name, hash_string])
 
         connection.commit()
         cursor.close()
@@ -146,9 +146,9 @@ def register():
     except Exception as e:
         return jsonify({"error": str(e)}), codes.API_ERROR
     
-@player_blueprint.route("/player", methods=["GET"])
+@user_blueprint.route("/user", methods=["GET"])
 @requires_token
-def player():
+def user():
     try:
         token = get_auth_token()
         my_id = str(token["id"])
@@ -156,15 +156,15 @@ def player():
         connection = get_connection()
         cursor = connection.cursor()
 
-        cursor.execute("""SELECT id, name FROM player WHERE id = %s""", [my_id])
+        cursor.execute("""SELECT id, user_name FROM kituser WHERE id = %s""", [my_id])
         result = cursor.fetchone()
 
-        player_name = {
+        user_name = {
             "id": result[0],
             "name": result[1]
         } 
 
-        return jsonify(player_name)
+        return jsonify(user_name)
 
     except Exception as e:
         return jsonify({"error": str(e)}), codes.API_ERROR

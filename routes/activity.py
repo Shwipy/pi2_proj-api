@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from database import get_connection, get_connection
 from utils import get_auth_header, get_auth_token, get_body, in_json, codes
-from routes.player import requires_token
+from routes.user import requires_token
 import jwt
 import datetime
 from functools import wraps
