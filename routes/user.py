@@ -34,9 +34,8 @@ def requires_token(f):
         if expire_date < current_date:
             return jsonify({"error": "Token has expired"}), codes.BAD_REQUEST
 
-        connection = get_connection()
-        cursor = connection.cursor()
-
+        connection, cursor = get_connection()
+       
         cursor.execute("""SELECT user_name FROM kituser WHERE id = %s""",
                        [get_auth_token()["id"]])
         result = cursor.fetchone()
@@ -64,8 +63,7 @@ def login():
             
             username = body["name"].strip().lower()
 
-            connection = get_connection()
-            cursor = connection.cursor()
+            connection, cursor = get_connection()
 
             cursor.execute("""SELECT id, password FROM kituser WHERE user_name = %s""",[username])
             result = cursor.fetchone()
@@ -85,7 +83,7 @@ def login():
 
             token = jwt.encode({
                 "id": id,
-                "expire_date": (datetime.datetime.now() + datetime.timedelta(minutes = 5)).timestamp()
+                "expire_date": (datetime.datetime.now() + datetime.timedelta(minutes = 999)).timestamp()
             }, os.getenv("TOKEN_KEY")).decode()
 
             connection.close()
@@ -109,7 +107,8 @@ def token():
 
         renewed_token = jwt.encode({
             "id": token["id"],
-            "expire_date": (datetime.datetime.now() + datetime.timedelta(minutes = 5)).timestamp()
+            #Comentario para não me esquecer de mudar o tempo de vida do token para um valor ok, pq estou farto de receber token expired... :C
+            "expire_date": (datetime.datetime.now() + datetime.timedelta(minutes = 999)).timestamp()
         }, os.getenv("TOKEN_KEY")).decode()
 
         return jsonify({"token": renewed_token})
@@ -125,8 +124,7 @@ def register():
         if not in_json(body, ["name", "password"]):
             return jsonify({"error": "Missing required fields: (name, password)"}), codes.BAD_REQUEST
 
-        connection = get_connection()
-        cursor = connection.cursor()
+        connection, cursor = get_connection()
 
         user_name = body["name"].strip().lower()
         
@@ -153,8 +151,7 @@ def user():
         token = get_auth_token()
         my_id = str(token["id"])
 
-        connection = get_connection()
-        cursor = connection.cursor()
+        connection, cursor = get_connection()
 
         cursor.execute("""SELECT id, user_name FROM kituser WHERE id = %s""", [my_id])
         result = cursor.fetchone()
@@ -162,7 +159,10 @@ def user():
         user_name = {
             "id": result[0],
             "name": result[1]
-        } 
+        }
+
+        connection.close()
+        cursor.close()
 
         return jsonify(user_name)
 

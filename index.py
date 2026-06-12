@@ -1,16 +1,17 @@
 from flask import Flask
 from routes.user import user_blueprint
 from routes.kit import kit_blueprint
-from routes.question import question_blueprint
-from routes.activity import activity_blueprint
+from routes.item import item_blueprint
+from routes.category import category_blueprint
 from dotenv import load_dotenv
-import bcrypt
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 app.register_blueprint(user_blueprint)
 app.register_blueprint(kit_blueprint)
-app.register_blueprint(question_blueprint)
-app.register_blueprint(activity_blueprint)
+app.register_blueprint(item_blueprint)
+app.register_blueprint(category_blueprint)
 
 
 app.debug = True

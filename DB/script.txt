@@ -1,37 +1,37 @@
-CREATE TABLE users (
+CREATE TABLE kituser (
 	id	 BIGSERIAL,
 	user_name VARCHAR(512) NOT NULL,
-	password	 BOOL NOT NULL,
+	password	 VARCHAR(512) NOT NULL,
 	PRIMARY KEY(id)
 );
 
 CREATE TABLE kit (
 	id	 BIGSERIAL,
-	kit_name VARCHAR(512),
+	kit_name	 VARCHAR(512),
 	payed	 BOOL NOT NULL DEFAULT false,
-	users_id BIGINT NOT NULL,
+	kituser_id BIGINT NOT NULL,
 	PRIMARY KEY(id)
 );
 
 CREATE TABLE category (
 	id		 BIGSERIAL,
-	category_name VARCHAR(512) NOT NULL,
-	item_id	 BIGINT NOT NULL,
-	users_id	 BIGINT NOT NULL,
+	category_name VARCHAR(512),
+	kituser_id	 BIGINT NOT NULL,
 	PRIMARY KEY(id)
 );
 
 CREATE TABLE item (
-	id	 BIGSERIAL,
-	item_name VARCHAR(512) NOT NULL,
+	id		 BIGSERIAL,
+	item_name	 VARCHAR(512) NOT NULL,
+	category_id BIGINT NOT NULL,
 	kit_id	 BIGINT NOT NULL,
-	users_id	 BIGINT NOT NULL,
+	kituser_id	 BIGINT NOT NULL,
 	PRIMARY KEY(id)
 );
 
-ALTER TABLE users ADD UNIQUE (user_name);
-ALTER TABLE kit ADD CONSTRAINT kit_fk1 FOREIGN KEY (users_id) REFERENCES users(id);
-ALTER TABLE category ADD CONSTRAINT category_fk1 FOREIGN KEY (item_id) REFERENCES item(id);
-ALTER TABLE category ADD CONSTRAINT category_fk2 FOREIGN KEY (users_id) REFERENCES users(id);
-ALTER TABLE item ADD CONSTRAINT item_fk1 FOREIGN KEY (kit_id) REFERENCES kit(id);
-ALTER TABLE item ADD CONSTRAINT item_fk2 FOREIGN KEY (users_id) REFERENCES users(id);
+ALTER TABLE kituser ADD UNIQUE (user_name);
+ALTER TABLE kit ADD CONSTRAINT kit_fk1 FOREIGN KEY (kituser_id) REFERENCES kituser(id) ON DELETE CASCADE;
+ALTER TABLE category ADD CONSTRAINT category_fk1 FOREIGN KEY (kituser_id) REFERENCES kituser(id) ON DELETE CASCADE;
+ALTER TABLE item ADD CONSTRAINT item_fk1 FOREIGN KEY (category_id) REFERENCES category(id) ON DELETE CASCADE;
+ALTER TABLE item ADD CONSTRAINT item_fk2 FOREIGN KEY (kit_id) REFERENCES kit(id) ON DELETE CASCADE;
+ALTER TABLE item ADD CONSTRAINT item_fk3 FOREIGN KEY (kituser_id) REFERENCES kituser(id) ON DELETE CASCADE;
