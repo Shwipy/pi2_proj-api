@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": "*"}})
+CORS(app)
 app.register_blueprint(user_blueprint)
 app.register_blueprint(kit_blueprint)
 app.register_blueprint(item_blueprint)
