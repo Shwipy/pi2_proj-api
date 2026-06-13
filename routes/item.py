@@ -126,7 +126,7 @@ def get_item(item_id):
         "category_id": results[2],
         "kit_id": results[3],
         "kituser_id": results[4],
-        "payed": results[5]
+        "paid": results[5]
         }
     
     token = get_auth_token()
