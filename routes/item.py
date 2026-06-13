@@ -53,7 +53,7 @@ def create_item(kit_id):
         return jsonify({"error": "Missing required fields: (name)"}), codes.BAD_REQUEST
     
     if not in_json(body, ["category_id"]):
-        category_id = null
+        category_id = None
     else:
         category_id = body["category_id"]
 
