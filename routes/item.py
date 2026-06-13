@@ -43,6 +43,8 @@ def item(item_id):
 
 def create_item(kit_id):
 
+    connection, cursor = get_connection()
+
     token = get_auth_token()
     kituser_id = token["id"]
     
@@ -54,7 +56,6 @@ def create_item(kit_id):
 
 
     body = get_body()
-    connection, cursor = get_connection()
 
     if not in_json(body, ["name"]):
         return jsonify({"error": "Missing required fields: (name)"}), codes.BAD_REQUEST
