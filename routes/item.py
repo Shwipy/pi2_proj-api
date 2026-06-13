@@ -49,12 +49,6 @@ def create_item(kit_id):
     body = get_body()
     connection, cursor = get_connection()
 
-    cursor.execute("""SELECT * FROM kit WHERE id = %s""",[kit_id])
-    results = cursor.fetchone()
-
-    if not results:
-        return jsonify({"error": "kit Index not Found"}),codes.NOT_FOUND
-
     if not in_json(body, ["name"]):
         return jsonify({"error": "Missing required fields: (name)"}), codes.BAD_REQUEST
     
