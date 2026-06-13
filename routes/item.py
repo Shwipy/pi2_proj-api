@@ -118,9 +118,10 @@ def get_item(item_id):
     item = {
         "id": results[0],
         "item_name": results[1],
-        "kit_id": results[2],
-        "kituser_id": results[3],
-        "payed": results[4]
+        "category_id": results[2],
+        "kit_id": results[3],
+        "kituser_id": results[4],
+        "payed": results[5]
         }
     
     token = get_auth_token()
