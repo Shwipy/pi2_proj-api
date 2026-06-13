@@ -94,7 +94,7 @@ def get_kit_items(kit_id):
     for result_row in results:
         kits.append({
             "id": result_row[0],
-            "kit_name": result_row[1],
+            "item_name": result_row[1],
             "kit_id": result_row[2],
             "category_id": 0,
             "kituser_id": result_row[4],
