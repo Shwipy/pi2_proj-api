@@ -86,10 +86,6 @@ def get_kit_items(kit_id):
     cursor.execute("""SELECT * FROM item WHERE kit_id = %s and kituser_id = %s ORDER BY id""",[kit_id, user_id])
     results = cursor.fetchall()
 
-    if not results:
-        return jsonify({"error": "kit Index not Found"}),codes.NOT_FOUND
-
-    
     kits = []
     for result_row in results:
         kits.append({
