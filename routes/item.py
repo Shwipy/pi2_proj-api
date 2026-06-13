@@ -156,13 +156,14 @@ def update_item(item_id):
     item = {
         "id": results[0],
         "item_name": results[1],
-        "kit_id": results[2],
-        "kituser_id": results[3],
-        "paid": results[4]
+        "category_id": results[2],
+        "kit_id": results[3],
+        "kituser_id": results[4],
+        "paid": results[5]
     }
 
     token = get_auth_token()
-    if token["id"] != results[3]:
+    if token["id"] != results[4]:
         return jsonify({"error": "Can't update another users item"}), codes.UNAUTHORIZED
 
     if in_json(body, ["item_name"]):
