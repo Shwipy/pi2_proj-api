@@ -35,6 +35,10 @@ def item(item_id):
         if request.method == "PUT":
             
             return update_item(item_id)
+        
+        if request.method == "DELETE":
+            
+            return delete_item(item_id)
 
     except Exception as e:
         return jsonify({"error": str(e)}), codes.API_ERROR
