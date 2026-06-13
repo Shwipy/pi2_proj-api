@@ -82,7 +82,12 @@ def get_kit_items(kit_id):
     token = get_auth_token()
     user_id = token["id"]
 
-    cursor.execute("""SELECT * FROM item WHERE kit_id = %s and kituser_id = %s ORDER BY id""",[kit_id, user_id])
+    cursor.execute("""SELECT kituser_id FROM kits WHERE id = %s""",[kit_id])
+    results = cursor.fetchone()
+    if user_id == results[0]:
+        return jsonify({"error": "Cant view other users kits"}),codes.UNAUTHORIZED
+
+    cursor.execute("""SELECT * FROM item WHERE kit_id = %s""",[kit_id])
     results = cursor.fetchall()
 
     kits = []
