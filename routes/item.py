@@ -57,10 +57,15 @@ def create_item(kit_id):
 
     if not in_json(body, ["name"]):
         return jsonify({"error": "Missing required fields: (name)"}), codes.BAD_REQUEST
+    
+    if not in_json(body, ["category_id"]):
+        category_id = null
+    else:
+        category_id = body["category_id"]
 
-    cursor.execute("""INSERT INTO item (item_name, paid, kituser_id, kit_id)
-                        VALUES (%s, false, %s, %s)""",
-                    [body["name"], kituser_id, kit_id])
+    cursor.execute("""INSERT INTO item (item_name, paid, kituser_id, kit_id, category_id)
+                        VALUES (%s, false, %s, %s, %s)""",
+                    [body["name"], kituser_id, kit_id, category_id])
 
     connection.commit()
 
@@ -91,8 +96,9 @@ def get_kit_items(kit_id):
             "id": result_row[0],
             "kit_name": result_row[1],
             "kit_id": result_row[2],
-            "kituser_id": result_row[3],
-            "paid": result_row[4]
+            "category_id": 0,
+            "kituser_id": result_row[4],
+            "paid": result_row[5]
         })
     
     connection.close()
