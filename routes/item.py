@@ -45,6 +45,13 @@ def create_item(kit_id):
 
     token = get_auth_token()
     kituser_id = token["id"]
+    
+    cursor.execute("""SELECT * FROM kit WHERE id = %s and kituser_id = %s""",[kit_id, kituser_id])
+    results = cursor.fetchone()
+
+    if not results:
+        return jsonify({"error": "Kit is not yours"}), codes.NOT_FOUND
+
 
     body = get_body()
     connection, cursor = get_connection()
@@ -75,8 +82,6 @@ def get_kit_items(kit_id):
     token = get_auth_token()
     user_id = token["id"]
 
-    
-
     cursor.execute("""SELECT * FROM item WHERE kit_id = %s and kituser_id = %s ORDER BY id""",[kit_id, user_id])
     results = cursor.fetchall()
 
@@ -105,7 +110,7 @@ def get_item(item_id):
     if not results:
         return jsonify({"error": "Item Index not Found"}),codes.NOT_FOUND
 
-    kit = {
+    item = {
         "id": results[0],
         "item_name": results[1],
         "kit_id": results[2],
@@ -116,14 +121,14 @@ def get_item(item_id):
     token = get_auth_token()
     id = token["id"]
 
-    if (kit["kituser_id"] != id):
-        return jsonify({"error": "Can't see another Users Kits"}), codes.UNAUTHORIZED
+    if (item["kituser_id"] != id):
+        return jsonify({"error": "Can't see another Users Item"}), codes.UNAUTHORIZED
     
     
     connection.close()
     cursor.close()
 
-    return jsonify(kit)
+    return jsonify(item)
 
 def update_item(item_id):
 
