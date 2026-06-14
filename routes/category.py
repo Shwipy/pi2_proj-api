@@ -103,7 +103,11 @@ def get_category(category_id):
 
     if not results:
         return jsonify({"error": "Category not found"}), codes.NOT_FOUND
-    
+
+    token = get_auth_token()
+    if token["id"] != results[2]:
+        return jsonify({"error": "Can't view another users category"}), codes.UNAUTHORIZED
+
     category = {
         "id": results[0],
         "category_name": results[1],
