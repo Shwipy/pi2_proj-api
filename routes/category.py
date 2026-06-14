@@ -8,15 +8,13 @@ from functools import wraps
 
 category_blueprint = Blueprint("category_blueprint", __name__)
 
+
+#Fazer Join no get do item para meter logo o nome da categoria!!!!!
 @category_blueprint.route("/items/<int:item_id>/category<int:category_id>", methods=["POST", "GET"])
 @requires_token
 def category_items(kit_id,category_id):
     try:
 
-        if request.method == "POST":
-            
-            return add_category_item(kit_id)
-        
         if request.method == "GET":
 
             return get_category_items(kit_id, category_id)

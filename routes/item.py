@@ -114,7 +114,8 @@ def get_kit_items(kit_id):
 def get_item(item_id):
     connection, cursor = get_connection()
         
-    cursor.execute("""SELECT * FROM item WHERE id = %s""",[item_id])
+    cursor.execute("""SELECT item.id, item.item_name, item.category_id, item.kit_id, item.kituser_id, item.paid,
+               category.category_name FROM item LEFT JOIN category ON item.category_id = category.id WHERE item.id = %s""",[item_id])
     results = cursor.fetchone()
 
     if not results:
@@ -126,7 +127,8 @@ def get_item(item_id):
         "category_id": results[2],
         "kit_id": results[3],
         "kituser_id": results[4],
-        "paid": results[5]
+        "paid": results[5],
+        "category_name": results[6]
         }
     
     token = get_auth_token()
