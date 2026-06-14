@@ -8,14 +8,14 @@ from functools import wraps
 
 category_blueprint = Blueprint("category_blueprint", __name__)
 
-@category_blueprint.route("/kits/<int:kit_id>/category<int:category_id>", methods=["POST", "GET"])
+@category_blueprint.route("/items/<int:item_id>/category<int:category_id>", methods=["POST", "GET"])
 @requires_token
 def category_items(kit_id,category_id):
     try:
 
-        #if request.method == "POST":
+        if request.method == "POST":
             
-            #return add_category_item(kit_id)
+            return add_category_item(kit_id)
         
         if request.method == "GET":
 
@@ -51,7 +51,7 @@ def category(category_id = None):
     
 
 
-def create_category():
+def create_categories():
 
     token = get_auth_token()
     kituser_id = token["id"]
@@ -74,7 +74,7 @@ def create_category():
 
     return jsonify({"message": "ok"})
 
-def get_categories():
+def get_category():
     token = get_auth_token()
     id = token["id"]
     connection, cursor = get_connection()
