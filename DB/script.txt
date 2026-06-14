@@ -1,37 +1,38 @@
-CREATE TABLE kituser (
-	id	 BIGSERIAL,
-	user_name VARCHAR(512) NOT NULL,
-	password	 VARCHAR(512) NOT NULL,
-	PRIMARY KEY(id)
+CREATE TABLE public.kituser (
+	id bigserial NOT NULL,
+	user_name varchar(512) NOT NULL,
+	"password" varchar(512) NOT NULL,
+	CONSTRAINT kituser_pkey PRIMARY KEY (id),
+	CONSTRAINT kituser_user_name_key UNIQUE (user_name)
 );
 
-CREATE TABLE kit (
-	id	 BIGSERIAL,
-	kit_name	 VARCHAR(512),
-	payed	 BOOL NOT NULL DEFAULT false,
-	kituser_id BIGINT NOT NULL,
-	PRIMARY KEY(id)
+CREATE TABLE public.kit (
+	id bigserial NOT NULL,
+	kit_name varchar(512) NULL,
+	kituser_id int8 NOT NULL,
+	CONSTRAINT kit_pkey PRIMARY KEY (id)
 );
 
-CREATE TABLE category (
-	id		 BIGSERIAL,
-	category_name VARCHAR(512),
-	kituser_id	 BIGINT NOT NULL,
-	PRIMARY KEY(id)
+CREATE TABLE public.item (
+	id bigserial NOT NULL,
+	item_name varchar(512) NOT NULL,
+	category_id int8 NULL,
+	kit_id int8 NOT NULL,
+	kituser_id int8 NOT NULL,
+	paid bool DEFAULT false NOT NULL,
+	CONSTRAINT item_pkey PRIMARY KEY (id)
 );
 
-CREATE TABLE item (
-	id		 BIGSERIAL,
-	item_name	 VARCHAR(512) NOT NULL,
-	category_id BIGINT NOT NULL,
-	kit_id	 BIGINT NOT NULL,
-	kituser_id	 BIGINT NOT NULL,
-	PRIMARY KEY(id)
+CREATE TABLE public.category (
+	id bigserial NOT NULL,
+	category_name varchar(512) NULL,
+	kituser_id int8 NOT NULL,
+	CONSTRAINT category_pkey PRIMARY KEY (id)
 );
 
-ALTER TABLE kituser ADD UNIQUE (user_name);
-ALTER TABLE kit ADD CONSTRAINT kit_fk1 FOREIGN KEY (kituser_id) REFERENCES kituser(id) ON DELETE CASCADE;
-ALTER TABLE category ADD CONSTRAINT category_fk1 FOREIGN KEY (kituser_id) REFERENCES kituser(id) ON DELETE CASCADE;
-ALTER TABLE item ADD CONSTRAINT item_fk1 FOREIGN KEY (category_id) REFERENCES category(id) ON DELETE CASCADE;
-ALTER TABLE item ADD CONSTRAINT item_fk2 FOREIGN KEY (kit_id) REFERENCES kit(id) ON DELETE CASCADE;
-ALTER TABLE item ADD CONSTRAINT item_fk3 FOREIGN KEY (kituser_id) REFERENCES kituser(id) ON DELETE CASCADE;
+
+ALTER TABLE public.kit ADD CONSTRAINT kit_fk1 FOREIGN KEY (kituser_id) REFERENCES public.kituser(id) ON DELETE CASCADE;
+ALTER TABLE public.item ADD CONSTRAINT item_fk1 FOREIGN KEY (category_id) REFERENCES public.category(id) ON DELETE CASCADE;
+ALTER TABLE public.item ADD CONSTRAINT item_fk2 FOREIGN KEY (kit_id) REFERENCES public.kit(id) ON DELETE CASCADE;
+ALTER TABLE public.item ADD CONSTRAINT item_fk3 FOREIGN KEY (kituser_id) REFERENCES public.kituser(id) ON DELETE CASCADE;
+ALTER TABLE public.category ADD CONSTRAINT category_fk1 FOREIGN KEY (kituser_id) REFERENCES public.kituser(id) ON DELETE CASCADE;
