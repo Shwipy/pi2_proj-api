@@ -34,7 +34,7 @@ def category(category_id = None):
             return create_category()
         
         if request.method == "GET":
-            if get_category is not None:
+            if category_id is not None:
                 return get_category(category_id)
             
             return get_categories()
