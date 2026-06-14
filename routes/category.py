@@ -51,7 +51,7 @@ def category(category_id = None):
     
 
 
-def create_categories():
+def create_category():
 
     token = get_auth_token()
     kituser_id = token["id"]
@@ -74,7 +74,7 @@ def create_categories():
 
     return jsonify({"message": "ok"})
 
-def get_category():
+def get_categories():
     token = get_auth_token()
     id = token["id"]
     connection, cursor = get_connection()
